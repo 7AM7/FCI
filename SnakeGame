@@ -1,0 +1,305 @@
+#include <iostream>
+#include <Windows.h>
+#include <cmath>
+#include <set>
+#include <map>
+#include <algorithm>
+#include <conio.h>
+#include <string.h>
+#include <string>
+#include <time.h>
+#define MAX_LEVEL 4
+
+using namespace std;
+//string k= "";
+enum Directon
+{
+	STOP = 0,
+	LEFT,
+	RIGHT,
+	UP,
+	DOWN
+};
+int tailX[100], tailY[100], nTail;
+bool GameEnd = false;
+int level = 1, mapwidth = 30,  mapheight = 20;
+int score, LevelScore = 0;
+int size = mapwidth * mapheight;
+int food = 0; int foodx, foody, x, y;
+int *map = new int[size];
+void UpdateLevel();
+int   GetLevel();
+void SetLevel(int ilevel);
+void LooseLevel(int level);
+void NextLevel(int level);
+void PrintMap();
+void Body();
+void KeyBoradKeys();
+void Move();
+void Position();
+void Information();
+void EtcPosition();
+Directon dir;
+int main()
+{
+	Body();
+
+	while (!GameEnd)
+	{
+		PrintMap();
+		KeyBoradKeys();
+		Move();
+		UpdateLevel();
+		Sleep(60);
+	}
+	system("pause");
+	return 0;
+}
+void UpdateLevel()
+{
+	if (GetLevel() == 1)
+	{
+		system("color 0A");
+		LevelScore = 20;
+		if (score == 20)
+		{
+			level = 2;
+			LevelScore = 40;
+			system("cls");
+			cout << "Level 2 Waiting ......" << endl;
+			for (int i = 0; i < 20; i++)
+			{
+				cout << "-";
+				Sleep(100);
+				cout << "_";
+			}
+		}
+	}
+	else if (GetLevel() == 2)
+	{
+		system("color 4A");
+		LevelScore = 40;
+		system("cls");
+		if (score == 40)
+		{
+			level = 3;
+			LevelScore = 60;
+			cout << "Level 3 Waiting ......" << endl;
+			for (int i = 0; i < 20; i++)
+			{
+				cout << "-";
+				Sleep(100);
+				cout << "_";
+			}
+		}
+	}
+	else if (GetLevel() == 3)
+	{
+		system("color 3C");
+		LevelScore = 60;
+		system("cls");
+		if (score == 60)
+		{
+			level = 4;
+			LevelScore = 80;
+			cout << "Level 4 Waiting ......" << endl;
+			for (int i = 0; i < 20; i++)
+			{
+				cout << "-";
+				Sleep(100);
+				cout << "_";
+			}
+		}
+	}
+	else if (GetLevel() == 4)
+	{
+		system("color 4D");
+		LevelScore = 80;
+		if (score == 80)
+		{
+			system("cls");
+			GameEnd = true;
+			cout << "Heroo! Waiting ......" << endl;
+			for (int i = 0; i < 20; i++)
+			{
+				cout << "-";
+				Sleep(100);
+				cout << "_";
+			}
+			cout << endl;
+			cout << "You win $$$$$$$$$$$$$" << endl;
+		}	
+	}
+}
+int  GetLevel()
+{
+	return level;
+}
+void SetLevel(int ilevel)
+{
+	ilevel = level;
+}
+void LooseLevel(int level)
+{
+	level = level - 1;
+}
+void NextLevel(int level)
+{
+	if (GetLevel() > MAX_LEVEL)
+		level = 1;
+	else
+		level = level + 1;
+}
+void Body()
+{
+	GameEnd = false;
+	dir = STOP;
+	x = mapwidth / 2;
+	y = mapheight / 2; 
+	foodx = rand() % mapwidth;
+	foody = rand() % mapheight;
+	level=1;
+	LevelScore = 0;
+
+}
+void PrintMap()
+{
+	system("cls");
+	for (int i = 0; i < mapwidth+2; i++)
+		cout << "#";
+	cout << endl;
+	for (int i = 0; i < mapheight; i++)
+	{
+		for (int j = 0; j < mapwidth; j++)
+		{
+			if (j == 0)
+				cout << "*";
+			if (i == y && j == x)
+				cout << "X";
+			else if (i == foody && j == foodx)
+				cout << "F";
+			else
+			{
+				bool print = false;
+				for (int k = 0; k < nTail; k++)
+				{
+					if (tailX[k] == j && tailY[k] == i)
+					{
+						cout << "o";
+						print = true;
+					}
+				}
+				if (!print)
+					cout << " ";
+			}
+			if (j == mapwidth-1)
+				cout << "*";
+		}
+		cout << endl;
+	}
+	for (int i = 0; i < mapwidth + 2; i++)
+		cout << "#";
+	cout << endl;
+	Information();
+
+}
+void KeyBoradKeys()
+{
+	if (_kbhit())
+	{
+		switch (_getch())
+		{
+		case 'a':
+			dir = LEFT;
+			break;
+			case 'd':
+			dir = RIGHT;
+			break;
+			case 'w':
+			dir = UP;
+			break;
+		case 's':
+			dir = DOWN;
+			break;
+		case 'x' :
+			GameEnd = true;
+			break;
+		}
+	}
+}
+void Move()
+{
+	EtcPosition();
+	switch (dir)
+	{
+	case LEFT:
+		x--;
+		break;
+	case RIGHT:
+		x++;
+		break;
+	case UP:
+		y--;
+		break;
+	case DOWN:
+		y++;
+		break;
+	default:
+		break;
+	}
+	Position();
+	if (x == foodx && y == foody)
+	{
+		score += 10;
+		foodx = rand() % mapwidth/2;
+		foody = rand() % mapheight;
+		nTail++;
+	}
+}
+void Position()
+{
+	for (int i = 0;i < nTail; i++)
+	{
+		if (tailX[i] == x && tailY[i] == y)
+		{
+			system("cls");
+			GameEnd = true;
+			cout << "Game Over !! \a" << endl;
+		}
+
+	}
+	if (x >= mapwidth)
+		x = 0;
+	else if (x < 0)
+		x = mapwidth - 1;
+	if (y >= mapheight)
+		y = 0;
+	else if (y < 0)
+		y = mapheight - 1;
+}
+void Information()
+{
+	cout << "YourScore: " << score << endl;
+	cout << "LevelScore: " << LevelScore << endl;
+	cout << "Level: " << GetLevel() << endl;
+	cout << "By : MMW TEAM";
+	cout << endl;
+	cout << "Use w=up,a=left,s=down,d=right x=Close to control the snake";
+}
+void EtcPosition()
+{
+	int etcX = tailX[0];
+	int etcY = tailY[0];
+	int etc1X, etc1Y;
+	tailX[0] = x;
+	tailY[0] = y;
+	for (int i = 1; i < nTail; i++)
+	{
+		etc1X = tailX[i];
+		etc1Y = tailY[i];
+		tailX[i] = etcX;
+		tailY[i] = etcY;
+		etcX = etc1X;
+		etcY = etc1Y;
+	}
+}
