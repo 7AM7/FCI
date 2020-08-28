@@ -1,3 +1,93 @@
+#ifdef ENABLE_NEW_PVPSYSTEM
+EVENTINFO(TPVPEventStart)
+{
+	DynamicCharacterPtr ch;
+	DynamicCharacterPtr victim;
+	CPVP * pvp;
+	BYTE state;
+
+	TPVPEventStart() : ch(), victim(), state(0) {}
+};
+
+EVENTFUNC(pvp_duel_StartTimer)
+{
+	if (event == NULL)
+		return 0;
+
+	if (event->info == NULL)
+		return 0;
+
+	TPVPEventStart* info = dynamic_cast<TPVPEventStart*>(event->info);
+
+	if (info == NULL)
+	{
+		sys_err("ready_to_start_event> <Factor> Null pointer");
+		return 0;
+	}
+
+	LPCHARACTER ch1 = info->ch;
+	LPCHARACTER ch2 = info->victim;
+
+	if (ch1 == NULL)
+	{
+		sys_err("Pvp: Pvp start event info is null.");
+		return 0;
+	}
+
+	if (ch2 == NULL)
+	{
+		sys_err("Pvp: Pvp start event info is null.");
+		return 0;
+	}
+
+	switch (info->state)
+	{
+		case 0:
+		{
+			ch1->SpecificEffectPacket("D:/ymir work/ui/game/pvp_advanced/3.mse");
+			ch2->SpecificEffectPacket("D:/ymir work/ui/game/pvp_advanced/3.mse");
+			info->state++;
+			return PASSES_PER_SEC(1); break;
+		}
+		case 1:
+		{
+			ch1->SpecificEffectPacket("D:/ymir work/ui/game/pvp_advanced/2.mse");
+			ch2->SpecificEffectPacket("D:/ymir work/ui/game/pvp_advanced/2.mse");
+			info->state++;
+			return PASSES_PER_SEC(1);
+			break;
+		}
+		case 2:
+		{
+			ch1->SpecificEffectPacket("D:/ymir work/ui/game/pvp_advanced/1.mse");
+			ch2->SpecificEffectPacket("D:/ymir work/ui/game/pvp_advanced/1.mse");
+			info->state++;
+			return PASSES_PER_SEC(1);
+			break;
+		}
+		case 3:
+		{
+			ch1->SpecificEffectPacket("D:/ymir work/ui/game/pvp_advanced/go.mse");
+			ch2->SpecificEffectPacket("D:/ymir work/ui/game/pvp_advanced/go.mse");
+			info->state++;
+			return PASSES_PER_SEC(1);
+			break;
+		}
+		case 4:
+		{
+			info->pvp->Packet();
+			return 0;
+			break;
+		}
+		default:
+		{
+			return 0;
+			break;
+		}
+	}
+}
+
+#endif
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <algorithm>
